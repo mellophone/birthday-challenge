@@ -23,8 +23,12 @@ export default function Home() {
   const swap = (a: number, b: number) => {
     return new Promise((resolve) => {
       let isSwapped = false;
+      let last = new Date();
 
       const swapper = setInterval(() => {
+        let cur = new Date();
+        let tdif = (cur.getTime() - last.getTime()) / 1.5;
+
         const setSwap = (old: number, dif: number) => {
           if (Math.abs(old / dif) >= 230) {
             isSwapped = true;
@@ -40,7 +44,7 @@ export default function Home() {
             return 0;
           }
 
-          return old + 2 * dif;
+          return old + tdif * dif;
         };
 
         if (a == 1) {
@@ -58,6 +62,8 @@ export default function Home() {
         } else if (b == 3) {
           setCupC((old) => setSwap(old, a - b));
         }
+
+        last = cur;
       }, 1);
     });
   };
@@ -65,8 +71,12 @@ export default function Home() {
   const lower = () => {
     return new Promise((resolve) => {
       let isDown = false;
+      let last = new Date();
 
       const lowering = setInterval(() => {
+        let cur = new Date();
+        let tdif = (cur.getTime() - last.getTime()) / 3;
+
         setCupY((old) => {
           if (old >= 120) {
             isDown = true;
@@ -76,8 +86,9 @@ export default function Home() {
             return 120;
           }
 
-          return old + 1;
+          return old + tdif;
         });
+        last = cur;
       }, 1);
     });
   };
@@ -85,8 +96,12 @@ export default function Home() {
   const raise = () => {
     return new Promise((resolve) => {
       let isUp = false;
+      let last = new Date();
 
       const raising = setInterval(() => {
+        let cur = new Date();
+        let tdif = (cur.getTime() - last.getTime()) / 3;
+
         setCupY((old) => {
           if (old <= 0) {
             isUp = true;
@@ -97,6 +112,7 @@ export default function Home() {
 
           return old - 1;
         });
+        last = cur;
       }, 1);
     });
   };
@@ -181,8 +197,9 @@ export default function Home() {
             background: "gray",
             borderRadius: 15,
             border: "none",
-            cursor: "pointer",
+            cursor: phase % 3 === 0 ? "pointer" : "default",
             color: "black",
+            opacity: phase % 3 === 0 ? 1 : 0,
           }}
           onClick={async () => {
             if (phase % 9 === 0) {
