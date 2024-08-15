@@ -4,7 +4,7 @@ import Image from "next/image";
 import Cup from "../Cup";
 import Ball from "../Ball";
 import FullscreenCenter from "../FullscreenCenter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [ballPos, setBallPos] = useState(1);
@@ -14,6 +14,11 @@ export default function Home() {
   const [cupC, setCupC] = useState(0);
   const [title, setTitle] = useState("Kelsey's Birthday Challenge!");
   const [phase, setPhase] = useState(0);
+  const [zoom, setZoom] = useState(1);
+
+  useEffect(() => {
+    setZoom(window.innerWidth < 650 ? 0.5 : 1);
+  }, []);
 
   const swap = (a: number, b: number) => {
     return new Promise((resolve) => {
@@ -132,9 +137,7 @@ export default function Home() {
           justifyContent: "center",
           alignItems: "center",
           gap: 20,
-          zoom: (() => {
-            return window.innerWidth < 650 ? 0.5 : 1;
-          })(),
+          zoom,
         }}
       >
         <h1 style={{ fontFamily: "sans-serif" }}>{title}</h1>
