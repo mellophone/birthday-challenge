@@ -58,7 +58,7 @@ export default function Home() {
         } else if (b == 3) {
           setCupC((old) => setSwap(old, a - b));
         }
-      }, 0);
+      }, 1);
     });
   };
 
@@ -78,7 +78,7 @@ export default function Home() {
 
           return old + 1;
         });
-      }, 0);
+      }, 1);
     });
   };
 
@@ -97,7 +97,7 @@ export default function Home() {
 
           return old - 1;
         });
-      }, 0);
+      }, 1);
     });
   };
 
@@ -182,9 +182,10 @@ export default function Home() {
             borderRadius: 15,
             border: "none",
             cursor: "pointer",
+            color: "black",
           }}
           onClick={async () => {
-            if (phase === 0) {
+            if (phase % 9 === 0) {
               setPhase(1);
               setTitle("Shuffling...");
               await lower();
@@ -194,6 +195,8 @@ export default function Home() {
               await swap(3, 2);
               await swap(1, 3);
               await swap(1, 2);
+              await swap(2, 3);
+              await swap(1, 3);
               setPhase(2);
               setTitle("Pick a cup!");
             }
@@ -207,6 +210,8 @@ export default function Home() {
               await swap(3, 2);
               await swap(1, 3);
               await swap(1, 2);
+              await swap(2, 3);
+              await swap(1, 3);
               setPhase(5);
               setTitle("Pick a cup!");
             }
@@ -220,6 +225,8 @@ export default function Home() {
               await swap(3, 2);
               await swap(1, 3);
               await swap(1, 2);
+              await swap(2, 3);
+              await swap(1, 3);
               setPhase(8);
               setTitle("Pick a cup!");
             }
