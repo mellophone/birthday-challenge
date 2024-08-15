@@ -110,7 +110,7 @@ export default function Home() {
             return 0;
           }
 
-          return old - 1;
+          return old - tdif;
         });
         last = cur;
       }, 1);
