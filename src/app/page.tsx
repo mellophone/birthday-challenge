@@ -1,95 +1,230 @@
+"use client";
+
 import Image from "next/image";
-import styles from "./page.module.css";
+import Cup from "../Cup";
+import Ball from "../Ball";
+import FullscreenCenter from "../FullscreenCenter";
+import { useState } from "react";
 
 export default function Home() {
+  const [ballPos, setBallPos] = useState(1);
+  const [cupY, setCupY] = useState(0);
+  const [cupA, setCupA] = useState(0);
+  const [cupB, setCupB] = useState(0);
+  const [cupC, setCupC] = useState(0);
+  const [title, setTitle] = useState("Kelsey's Birthday Challenge!");
+  const [phase, setPhase] = useState(0);
+
+  const swap = (a: number, b: number) => {
+    return new Promise((resolve) => {
+      let isSwapped = false;
+
+      const swapper = setInterval(() => {
+        const setSwap = (old: number, dif: number) => {
+          if (Math.abs(old / dif) >= 230) {
+            isSwapped = true;
+            return 0;
+          }
+
+          if (old === 0 && isSwapped) {
+            clearInterval(swapper);
+            setCupA(0);
+            setCupB(0);
+            setCupC(0);
+            resolve(1);
+            return 0;
+          }
+
+          return old + 2 * dif;
+        };
+
+        if (a == 1) {
+          setCupA((old) => setSwap(old, b - a));
+        } else if (a == 2) {
+          setCupB((old) => setSwap(old, b - a));
+        } else if (a == 3) {
+          setCupC((old) => setSwap(old, b - a));
+        }
+
+        if (b == 1) {
+          setCupA((old) => setSwap(old, a - b));
+        } else if (b == 2) {
+          setCupB((old) => setSwap(old, a - b));
+        } else if (b == 3) {
+          setCupC((old) => setSwap(old, a - b));
+        }
+      }, 0);
+    });
+  };
+
+  const lower = () => {
+    return new Promise((resolve) => {
+      let isDown = false;
+
+      const lowering = setInterval(() => {
+        setCupY((old) => {
+          if (old >= 120) {
+            isDown = true;
+            clearInterval(lowering);
+            resolve(1);
+            setBallPos(0);
+            return 120;
+          }
+
+          return old + 1;
+        });
+      }, 0);
+    });
+  };
+
+  const raise = () => {
+    return new Promise((resolve) => {
+      let isUp = false;
+
+      const raising = setInterval(() => {
+        setCupY((old) => {
+          if (old <= 0) {
+            isUp = true;
+            clearInterval(raising);
+            resolve(1);
+            return 0;
+          }
+
+          return old - 1;
+        });
+      }, 0);
+    });
+  };
+
+  const decelerated = (input: number, a: number) => {
+    return (-1 / a) * Math.pow(input - a, 2) + a;
+  };
+
+  const onCupClick = async (clickNum: number) => {
+    if (phase === 8) {
+      setPhase(9);
+      setBallPos(clickNum);
+      setTitle("Congratulations! You did it!");
+      await raise();
+      return;
+    }
+
+    setPhase(phase + 1);
+    if (clickNum === 1) {
+      setBallPos([2, 3][Math.floor(Math.random() * 2)]);
+    }
+    if (clickNum === 2) {
+      setBallPos([1, 3][Math.floor(Math.random() * 2)]);
+    }
+    if (clickNum === 3) {
+      setBallPos([1, 2][Math.floor(Math.random() * 2)]);
+    }
+    setTitle("Incorrect! Click Start to try again!");
+    await raise();
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <FullscreenCenter>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 20,
+          zoom: (() => {
+            return window.innerWidth < 650 ? 0.5 : 1;
+          })(),
+        }}
+      >
+        <h1 style={{ fontFamily: "sans-serif" }}>{title}</h1>
+        <div
+          style={{
+            // border: "1px solid green",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, min-content)",
+            gap: 30,
+          }}
+        >
+          <Cup
+            hasBall={(() => ballPos == 1)()}
+            cupY={cupY}
+            cupX={cupA}
+            onClick={() => onCupClick(1)}
+            canClick={(() => phase % 3 === 2)()}
+          />
+          <Cup
+            hasBall={(() => ballPos == 2)()}
+            cupY={cupY}
+            cupX={cupB}
+            onClick={() => onCupClick(2)}
+            canClick={(() => phase % 3 === 2)()}
+          />
+          <Cup
+            hasBall={(() => ballPos == 3)()}
+            cupY={cupY}
+            cupX={cupC}
+            onClick={() => onCupClick(3)}
+            canClick={(() => phase % 3 === 2)()}
+          />
         </div>
+        <button
+          style={{
+            fontSize: 30,
+            fontFamily: "sans-serif",
+            padding: 10,
+            paddingLeft: 20,
+            paddingRight: 20,
+            background: "gray",
+            borderRadius: 15,
+            border: "none",
+            cursor: "pointer",
+          }}
+          onClick={async () => {
+            if (phase === 0) {
+              setPhase(1);
+              setTitle("Shuffling...");
+              await lower();
+              await swap(2, 3);
+              await swap(1, 2);
+              await swap(3, 2);
+              await swap(3, 2);
+              await swap(1, 3);
+              await swap(1, 2);
+              setPhase(2);
+              setTitle("Pick a cup!");
+            }
+            if (phase === 3) {
+              setPhase(4);
+              setTitle("Shuffling...");
+              await lower();
+              await swap(2, 3);
+              await swap(1, 2);
+              await swap(3, 2);
+              await swap(3, 2);
+              await swap(1, 3);
+              await swap(1, 2);
+              setPhase(5);
+              setTitle("Pick a cup!");
+            }
+            if (phase === 6) {
+              setPhase(7);
+              setTitle("Shuffling...");
+              await lower();
+              await swap(2, 3);
+              await swap(1, 2);
+              await swap(3, 2);
+              await swap(3, 2);
+              await swap(1, 3);
+              await swap(1, 2);
+              setPhase(8);
+              setTitle("Pick a cup!");
+            }
+          }}
+        >
+          Start
+        </button>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </FullscreenCenter>
   );
 }
